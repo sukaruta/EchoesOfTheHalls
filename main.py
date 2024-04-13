@@ -5,7 +5,7 @@ app = Ursina()
 player = FirstPersonController()
 floor = Entity(model="cube", texture="grass", scale=(200, 0, 200), collider="box")
 lebron = Entity(model="cube", texture="/textures/sunshine.png", scale=(0, 5, 5), collider="quad")
-lebron.add_script(SmoothFollow(target=player, offset=[2, 0, 2], speed=100))
+lebron.add_script(SmoothFollow(target=player, offset=[2, 0, 2], speed=0.5))
 sunshine = Audio(add_to_scene_entities=lebron, sound_file_name="/sfx/sfx_sunshine.mp3", autoplay=True)
 
 darkbron = Entity(model="cube", texture="/textures/darkshine.jpeg", scale=(0, 5, 5), collider="box")
@@ -15,3 +15,5 @@ darkshine.loop = True
 darkshine.loops = 100
 window.vsync = True
 app.run()
+
+
