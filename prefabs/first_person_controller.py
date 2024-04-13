@@ -5,7 +5,7 @@ class FirstPersonController(Entity):
     def __init__(self, **kwargs):
         self.direction = None
         self.cursor = Entity(parent=camera.ui, model='quad', color=color.pink, scale=.008, rotation_z=45)
-        self.stamina_bar = Entity(parent=camera.ui, model='quad', color=color.gray, scale=(2, .05, 0), y=-.48)
+        self.stamina_bar = Entity(parent=camera.ui, model='quad', color=color.gray, scale=(4, .05, 0), x=-1, y=-.48)
 
         super().__init__()
         self.speed = 5
@@ -50,9 +50,12 @@ class FirstPersonController(Entity):
         elif self.sprinting:
             if self.stamina > 0:
                 self.stamina -= .2
+
             elif self.stamina <= 0:
                 self.stamina = 0
                 self.stop_sprint()
+
+        self.stamina_bar.scale = (4 * self.stamina / 100, .05, 0)
 
         if self.camera_pivot.y > self.height:
             self.camera_pivot.y = self.height
@@ -111,7 +114,6 @@ class FirstPersonController(Entity):
             # if not on ground and not on way up in jump, fall
             self.y -= min(self.air_time, ray.distance - .05) * time.dt * 100
             self.air_time += time.dt * .25 * self.gravity
-
     def input(self, key):
         print(key)
         if key == 'space':
@@ -182,3 +184,4 @@ class FirstPersonController(Entity):
     def on_disable(self):
         mouse.locked = False
         self.cursor.enabled = False
+
