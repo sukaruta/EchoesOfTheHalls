@@ -45,9 +45,9 @@ class FirstPersonController(Entity):
                 self.y = ray.world_point.y
 
     def update(self):
-        if not self.sprinting and self.stamina < 100:
+        if (not self.sprinting or (self.is_moving() is False)) and self.stamina < 100:
             self.stamina += .2
-        elif self.sprinting:
+        elif self.sprinting and (held_keys['w'] or held_keys['a'] or held_keys['s'] or held_keys['d']):
             if self.stamina > 0:
                 self.stamina -= .2
 
@@ -114,6 +114,7 @@ class FirstPersonController(Entity):
             # if not on ground and not on way up in jump, fall
             self.y -= min(self.air_time, ray.distance - .05) * time.dt * 100
             self.air_time += time.dt * .25 * self.gravity
+
     def input(self, key):
         print(key)
         if key == 'space':
@@ -185,3 +186,9 @@ class FirstPersonController(Entity):
         mouse.locked = False
         self.cursor.enabled = False
 
+    def is_moving(self):
+        if self.direction is None:
+            return False
+        elif self.direction.x + self.direction.y + self.direction.z != 0:
+            return True
+        return False
