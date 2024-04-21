@@ -21,6 +21,7 @@ material69.texture = load_texture("assets/textures/kimmonster.png")
 material69.specular_map = load_texture("assets/textures/kimmonster.png")
 enemy = BaseEnemy(model="quad", shader=shader, position=(2, 3, 0), double_sided=True, scale=6, collider="mesh")
 enemy.set_material(material69)
+enemy.collider = 'box'
 
 material2 = Material()
 material2.texture = load_texture("assets/textures/chipping-painted-wall_albedo")
@@ -43,7 +44,19 @@ flashlight_light.update_values()
 def update():
     flashlight_light.direction = camera.forward.normalized()
     flashlight_light.update_values()
+    direction_to_player = player.position - enemy.position
+    distance_to_player = direction_to_player.length()
+    direction_to_player.y = 0
+    direction_to_player.normalize()
+    enemy.position += direction_to_player * 0.03
     enemy.look_at_2d(player.position, 'y')
+    collision_info = enemy.intersects(walls)
+    if collision_info.hit:
+        collision_normal = collision_info.normal.normalized()
+        slide_direction = Vec3(collision_normal.x, 0, collision_normal.z)
+        enemy.position += slide_direction * 0.09
+
+
 Audio("assets/sfx/burningmemory.ogg").play()
 window.vsync = True
 app.run()
