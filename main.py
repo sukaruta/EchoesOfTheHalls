@@ -47,7 +47,7 @@ enemy.collider = "box"
 
 flashlight_light.update_values()
 
-jumpscare_text = Text(text="YOU DIED.", y=-0.3, origin=(0, 0), scale=80, color=color.red, background=True, background_color=color.black, enabled=False)
+jumpscare_text = Text(text="YOU DIED.", origin=(0, 0), scale=5, color=color.red, background=True, background_color=color.black, enabled=False)
 
 def on_collision():
     global spawn_protected
