@@ -116,7 +116,6 @@ class FirstPersonController(Entity):
             self.air_time += time.dt * .25 * self.gravity
 
     def input(self, key):
-        print(key)
         if key == 'space':
             self.jump()
         if key == 'left shift':
@@ -145,7 +144,6 @@ class FirstPersonController(Entity):
         self.speed -= 1
         self.height = clamp(self.height / 2, 1, 2)
         self.camera_pivot.animate_y(self.camera_pivot.y / 2, .5, resolution=int(1 // time.dt), curve=curve.out_expo)
-        print(self.camera_pivot.y > self.height)
 
     def uncrouch(self):
         if not self.crouching:

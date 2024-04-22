@@ -1,5 +1,4 @@
 from ursina import *
-from panda3d.ai import AIWorld, AICharacter
 from prefabs.material import Material
 from prefabs.entity import cEntity
 from prefabs.light import SpotLight
@@ -14,7 +13,6 @@ player.collider = BoxCollider(player, center=(0, player.height / 2, 0), size=(0.
 global spawn_protection_duration
 spawn_protection_duration = 5  # Duration of spawn protection in seconds
 spawn_protected = True
-
 flashlight = cEntity()
 shader = Shader.load(Shader.GLSL, "assets/shaders/vertex.vert", "assets/shaders/SpotFragment.frag")
 flashlight_light = SpotLight(color=color.white, rotation=player.camera_pivot.rotation)
@@ -23,34 +21,33 @@ flashlight_light.model = None
 flashlight_light.setShader(shader)
 flashlight_light.add_script(SmoothFollow(player, offset=(0, player.height, 0)))
 
-material69 = Material()
-material69.texture = load_texture("assets/textures/kimmonster.png")
-material69.specular_map = load_texture("assets/textures/kimmonster.png")
-enemy = BaseEnemy(model="quad", shader=shader, position=(2, 3, 0), double_sided=True, scale=6, collider="mesh")
-enemy.set_material(material69)
-enemy.collider = 'box'
 
 material2 = Material()
 material2.texture = load_texture("assets/textures/chipping-painted-wall_albedo")
 material2.specular_map = load_texture("assets/textures/chipping-painted-wall_metallic")
-material2.texture_scale = Vec2(2, 2)
-walls = cEntity(model="assets/objects/imcummingmaze.obj", scale=5, position=(10, 0, 10), collider="mesh", shader=shader)
+material2.texture_scale = Vec2(100, 100)
+walls = cEntity(model="assets/objects/imcummingmaze.obj", scale=6, position=(0, 0, 0), collider="mesh", shader=shader)
 walls.set_material(material2)
 
 material3 = Material()
 material3.texture = load_texture("assets/textures/floortile.jpg")
 material3.specular_map = load_texture("assets/textures/floortile.jpg")
-floor = cEntity(model="testroom2_floor.obj", collider="box", scale=(50, 50, 50))
+floor = cEntity(model="plane", collider="mesh", scale=80, shader=shader, position=(0, 0.2, 0), rotation=(180, 180, 0), double_sided=True)
 floor.set_material(material3)
-floor.shader = shader
 
-roof = cEntity(model="plane", texture="grass", collider="box", scale=(100, 100, 100), position=(0, 7, 0), shader=shader)
+roof = cEntity(model="plane", texture="grass", collider="mesh.", scale=80, position=(0, 7, 0), shader=shader)
 roof.rotation = (180, 180, 0)
+
+material69 = Material()
+material69.texture = load_texture("assets/textures/kimmonster.png")
+material69.specular_map = load_texture("assets/textures/kimmonster.png")
+enemy = BaseEnemy(model="quad", shader=shader, position=(2, 3, 0), double_sided=True, scale=(6, 6, material69.texture.width), collider="mesh", target=player, walls=walls)
+enemy.set_material(material69)
+enemy.collider = "box"
 
 flashlight_light.update_values()
 
-# Create a jumpscare text
-jumpscare_text = Text(text="h", y=-0.3, origin=(0, 0), scale=100, color=color.red, background=True, background_color=color.black, enabled=False)
+jumpscare_text = Text(text="YOU DIED.", y=-0.3, origin=(0, 0), scale=80, color=color.red, background=True, background_color=color.black, enabled=False)
 
 def on_collision():
     global spawn_protected
@@ -84,6 +81,7 @@ def update():
         enemy.position += slide_direction * 0.09
     if not spawn_protected and player.intersects(enemy).hit:
         on_collision()
+    enemy.target = player
 
     # Decrease spawn protection duration
     if spawn_protected:
