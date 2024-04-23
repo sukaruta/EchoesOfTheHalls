@@ -1,94 +1,99 @@
 from ursina import *
-from prefabs.material import Material
-from prefabs.entity import cEntity
-from prefabs.light import SpotLight
-from assets.scripts.BaseEnemy import BaseEnemy
-from prefabs.first_person_controller import FirstPersonController
-
-app = Ursina()
-player = FirstPersonController()
-player.collider = BoxCollider(player, center=(0, player.height / 2, 0), size=(0.5, player.height, 0.5))
-
-# Spawn protection variables
-global spawn_protection_duration
-spawn_protection_duration = 5  # Duration of spawn protection in seconds
-spawn_protected = True
-flashlight = cEntity()
-shader = Shader.load(Shader.GLSL, "assets/shaders/vertex.vert", "assets/shaders/SpotFragment.frag")
-flashlight_light = SpotLight(color=color.white, rotation=player.camera_pivot.rotation)
-flashlight_light.texture = None
-flashlight_light.model = None
-flashlight_light.setShader(shader)
-flashlight_light.add_script(SmoothFollow(player, offset=(0, player.height, 0)))
+from assets.scripts.MainGame import MainGame
 
 
-material2 = Material()
-material2.texture = load_texture("assets/textures/chipping-painted-wall_albedo")
-material2.specular_map = load_texture("assets/textures/chipping-painted-wall_metallic")
-material2.texture_scale = Vec2(100, 100)
-walls = cEntity(model="assets/objects/imcummingmaze.obj", scale=6, position=(0, 0, 0), collider="mesh", shader=shader)
-walls.set_material(material2)
+def start_game():
+    scene.clear()
+    MainGame()
 
-material3 = Material()
-material3.texture = load_texture("assets/textures/floortile.jpg")
-material3.specular_map = load_texture("assets/textures/floortile.jpg")
-floor = cEntity(model="plane", collider="mesh", scale=80, shader=shader, position=(0, 0.2, 0), rotation=(180, 180, 0), double_sided=True)
-floor.set_material(material3)
 
-roof = cEntity(model="plane", texture="grass", collider="mesh.", scale=80, position=(0, 7, 0), shader=shader)
-roof.rotation = (180, 180, 0)
+def init_game():
+    scene.clear()
+    Entity(parent=camera.ui, model='quad', texture="assets/videos/dialogue.mp4", scale=(2, 1), z=100)
+    Audio("assets/sfx/death_screen.wav").play()
+    invoke(start_game, delay=7)
 
-material69 = Material()
-material69.texture = load_texture("assets/textures/kimmonster.png")
-material69.specular_map = load_texture("assets/textures/kimmonster.png")
-enemy = BaseEnemy(model="quad", shader=shader, position=(2, 3, 0), double_sided=True, scale=(6, 6, material69.texture.width), collider="mesh", target=player, walls=walls)
-enemy.set_material(material69)
-enemy.collider = "box"
 
-flashlight_light.update_values()
+app = Ursina(fullscreen=True, icon="assets/textures/echoes.ico")
+menu_video_sound = Audio("assets/sfx/neon_sounds.mp3")
+menu_video_sound.loop = True
+menu_video_sound.play()
+menu_bg = Entity(parent=camera.ui, model='quad', texture="assets/videos/neon_flickering.mp4", scale=(2, 1), z=100)
+start = Button(radius=0, text='Start (BETA)', scale=(.2, .1), y=-0.1, on_click=init_game)
+menu_icon = Entity(parent=camera.ui, model='quad', texture="assets/textures/echoes.png", scale=0.5, y=0.3)
+start.alpha = 0.4
 
-jumpscare_text = Text(text="YOU DIED.", origin=(0, 0), scale=5, color=color.red, background=True, background_color=color.black, enabled=False)
-
-def on_collision():
-    global spawn_protected
-    global spawn_protection_duration
-
-    if not spawn_protected:  # Check if not spawn protected
-        # Reset player position
-        player.position = Vec3(0, 1, 0)
-        # Show jumpscare text
-        jumpscare_text.enabled = True
-        invoke(jumpscare_text.disable, delay=2)  # Disable jumpscare text after 1 second
-        # Reset spawn protection
-        spawn_protected = True
-        spawn_protection_duration = 3  # Reset spawn protection duration
-
-def update():
-    global spawn_protection_duration
-    global spawn_protected
-
-    flashlight_light.direction = camera.forward.normalized()
-    flashlight_light.update_values()
-    direction_to_player = player.position - enemy.position
-    direction_to_player.y = 0
-    direction_to_player.normalize()
-    enemy.position += direction_to_player * 0.03
-    enemy.look_at_2d(player.position, 'y')
-    collision_info = enemy.intersects(walls)
-    if collision_info.hit:
-        collision_normal = collision_info.normal.normalized()
-        slide_direction = Vec3(collision_normal.x, 0, collision_normal.z)
-        enemy.position += slide_direction * 0.09
-    if not spawn_protected and player.intersects(enemy).hit:
-        on_collision()
-    enemy.target = player
-
-    # Decrease spawn protection duration
-    if spawn_protected:
-        spawn_protection_duration -= time.dt
-        if spawn_protection_duration <= 0:
-            spawn_protected = False
-
-Audio("assets/sfx/burningmemory.ogg").play()
 window.vsync = True
 app.run()
+
+# bgm = Audio("assets/sfx/burningmemory.ogg")
+# player = FirstPersonController()
+# player.collider = BoxCollider(player, center=(0, player.height / 2, 0), size=(0.5, player.height, 0.5))
+
+# shader = Shader.load(Shader.GLSL, "assets/shaders/vertex.vert", "assets/shaders/SpotFragment.frag")
+#
+# soul_positions = [
+#     Vec3(12, 1, 3),
+#     Vec3(-18, 1, 7),
+#     Vec3(26, 1, -26),
+#     Vec3(5, 1, 10)
+# ]
+#
+# counter_text = Text(text=f"{player.collected_souls} / {len(soul_positions)}", parent=camera.ui, font=rf"assets/fonts/DS-DIGII.ttf", y=0.48, x=-0.85)
+#
+# for pos in soul_positions:
+#     orb = SoulOrb(model="sphere", color=color.cyan, texture=None, shader=shader, player=player, collider="sphere", font=counter_text.font)
+#     orb.world_position = pos
+#
+# flashlight_light = SpotLight(color=color.white, rotation=player.camera_pivot.rotation)
+# flashlight_light.texture = None
+# flashlight_light.model = None
+# flashlight_light.setShader(shader)
+# flashlight_light.add_script(SmoothFollow(player, offset=(0, player.height, 0)))
+#
+#
+# material2 = Material()
+# material2.texture = load_texture("assets/textures/chipping-painted-wall_albedo")
+# material2.specular_map = load_texture("assets/textures/chipping-painted-wall_metallic")
+# material2.texture_scale = Vec2(100, 100)
+# walls = cEntity(model="assets/objects/imcummingmaze.obj", scale=6, position=(0, 0, 0), collider="mesh", shader=shader)
+# walls.set_material(material2)
+#
+# material3 = Material()
+# material3.texture = load_texture("assets/textures/floortile.jpg")
+# material3.specular_map = load_texture("assets/textures/floortile.jpg")
+# floor = cEntity(model="plane", collider="mesh", scale=80, shader=shader, position=(0, 0.2, 0), rotation=(180, 180, 0), double_sided=True)
+# floor.set_material(material3)
+#
+# roof = cEntity(model="plane", texture="grass", collider="mesh", scale=80, position=(0, 7, 0), shader=shader)
+# roof.rotation = (180, 180, 0)
+#
+# material69 = Material()
+# material69.texture = load_texture("assets/textures/kimmonster.png")
+# material69.specular_map = load_texture("assets/textures/kimmonster.png")
+# enemy = BaseEnemy(model="quad", shader=shader, position=(6, 3, 0), double_sided=True, scale=(6, 6, material69.texture.width), collider="box", target=player, walls=walls, flashlight=flashlight_light)
+# enemy.collider = BoxCollider(enemy, Vec3(0, 0, 0), Vec3(0.5, 1, 0))
+# enemy.set_material(material69)
+# enemy.found_player_audio = Audio("assets/sfx/monsters/kim/found_player.wav", autoplay=False)
+# enemy.chase_audio = Audio("assets/sfx/monsters/kim/chase_scream.wav", autoplay=False)
+# enemy.spawn_locations = [Vec3(27, 0, 27), Vec3(-12, 0, 25), Vec3(-11, 0, -2), Vec3(-25, 0, -12)]
+#
+# flashlight_light.update_values()
+#
+#
+# enemy.disable()
+#
+#
+# def update():
+#     flashlight_light.direction = camera.forward.normalized()
+#     flashlight_light.update_values()
+#
+#     counter_text.text = f"{player.collected_souls} / {len(soul_positions)}"
+#
+#     if player.is_dead:
+#         bgm.stop()
+#
+#
+# bgm.play()
+# window.vsync = True
+# app.run()
