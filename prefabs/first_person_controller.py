@@ -13,7 +13,9 @@ class FirstPersonController(Entity):
         self.sprinting = False
         self.crouching = False
         self.stamina = 95
+        self.is_dead = False
         self.camera_pivot = Entity(parent=self, y=self.height)
+        self.collected_souls = 0
 
         camera.parent = self.camera_pivot
         camera.position = (0, 0, 0)
@@ -45,6 +47,7 @@ class FirstPersonController(Entity):
                 self.y = ray.world_point.y
 
     def update(self):
+        #print(self.world_position)
         if (not self.sprinting or (self.is_moving() is False)) and self.stamina < 100:
             self.stamina += .2
         elif self.sprinting and (held_keys['w'] or held_keys['a'] or held_keys['s'] or held_keys['d']):
