@@ -1,0 +1,51 @@
+{
+    "room1": {
+        "obj_dir": "assets/objects/room1.obj",
+        "room_audio": "assets/sfx/burningmemory.ogg",
+        "playerPos": [0, 0, 0],
+        "soul_positions": [
+            [12, 1, 3],
+            [-18, 1, 7],
+            [26, 1, -26],
+            [5, 1, 10]
+        ],
+        "enemy": {
+            "texture": "assets/textures/kimmonster.png",
+            "found_player_audio": "assets/sfx/monsters/kim/found_player.wav",
+            "chase_audio": "assets/sfx/monsters/kim/chase_scream.wav",
+            "chase_scream_short": "assets/sfx/monsters/kim/chase_scream_short.wav",
+            "init_pos": [6, 3, 0],
+            "spawn_locations": [
+                [27, 0, 27],
+                [-12, 0, 25],
+                [-11, 0, -2],
+                [-25, 0, -12]
+            ]
+        }
+    },
+
+        "room2": {
+        "obj_dir": "assets/objects/room2.obj",
+        "room_audio": "assets/sfx/burningmemory.ogg",
+        "playerPos": [-6, 0.2, 11.38],
+        "soul_positions": [
+            [-26, 1, 25],
+            [-17.9, 1, 13.1],
+            [-2, 1, -1],
+            [-0.92, 1, 19.39]
+        ],
+        "enemy": {
+            "texture": "assets/textures/janisian.png",
+            "found_player_audio": "assets/sfx/monsters/kim/found_player.wav",
+            "chase_audio": "assets/sfx/monsters/kim/chase_scream.wav",
+            "chase_scream_short": "assets/sfx/monsters/kim/chase_scream_short.wav",
+            "init_pos": [22.96, 0.13, 23.02],
+            "spawn_locations": [
+                [-26, 1, 25],
+                [-17.9, 0, 13.1],
+                [-2, 0, -1],
+                [-0.92, 0, 19.39]
+            ]
+        }
+    }
+}
