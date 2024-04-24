@@ -95,7 +95,7 @@ class BaseEnemy(cEntity, Entity):
         self.chase_audio.stop()
         scene.clear()
         Entity(model="quad", texture="textures/kimjump.png", parent=camera.ui, scale=(2, 1))
-        jumpscare_sound = Audio("sfx/monsters/kim/chase_scream_short.wav")
+        jumpscare_sound = self.chase_scream_short
         jumpscare_sound.loop = True
         jumpscare_sound.loops = 100
         jumpscare_sound.play()
