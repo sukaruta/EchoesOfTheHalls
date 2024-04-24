@@ -9,7 +9,7 @@ class SoulOrb(cEntity):
 
         for key, value in kwargs.items():
             setattr(self, key, value)
-        self.collection_text = Text(text="Collected soul orb", x=-0.1, y=-0.3, font=self.font)
+        self.collection_text = Text(text="Collected soul orb", x=-0.1, y=-0.3, font="assets/fonts/DS-DIGII.ttf")
         self.collection_text.fade_out(duration=0)
 
     def update(self):
@@ -21,4 +21,4 @@ class SoulOrb(cEntity):
             self.collection_text.enable()
             self.collection_text.fade_in(1, duration=0.5)
             invoke(self.collection_text.fade_out, delay=5)
-            self.disable()
+            destroy(self)
