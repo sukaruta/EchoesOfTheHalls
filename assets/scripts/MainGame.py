@@ -22,6 +22,7 @@ class MainGame(Entity):
         self.enemy_found_player_audio = ""
         self.enemy_chase_audio = ""
         self.chase_scream_short = ""
+        self.jumpscare_texture = ""
         self.level = 1
         self.finished_level = False
 
@@ -74,25 +75,26 @@ class MainGame(Entity):
         enemy_material = Material()
         enemy_material.texture = load_texture(self.enemy_texture)
         enemy_material.specular_map = load_texture(self.enemy_texture)
-        enemy = BaseEnemy(model="quad", shader=self.shader, position=(6, 3, 0), double_sided=True,
-                          scale=(6, 6, enemy_material.texture.width), collider="box", target=self.player,
-                          walls=self.walls,
-                          flashlight=self.flashlight_light)
-        enemy.collider = BoxCollider(enemy, Vec3(0, 0, 0), Vec3(0.5, 1, 0))
-        enemy.set_material(enemy_material)
-        enemy.found_player_audio = Audio(self.enemy_found_player_audio, autoplay=False)
-        enemy.chase_audio = Audio(self.enemy_chase_audio, autoplay=False)
-        enemy.chase_scream_short = Audio(self.chase_scream_short, autoplay=False)
-        enemy.spawn_locations = self.enemy_spawn_locations
-
-        enemy.disable()
+        self.enemy = BaseEnemy(model="quad", shader=self.shader, position=(6, 3, 0), double_sided=True,
+                               scale=(6, 6, enemy_material.texture.width), collider="box", target=self.player,
+                               walls=self.walls,
+                               flashlight=self.flashlight_light,
+                               jumpscare_texture=self.jumpscare_texture,
+                               finished_level=self.finished_level
+                               )
+        self.enemy.collider = BoxCollider(self.enemy, Vec3(0, 0, 0), Vec3(0.5, 1, 0))
+        self.enemy.set_material(enemy_material)
+        self.enemy.found_player_audio = Audio(self.enemy_found_player_audio, autoplay=False)
+        self.enemy.chase_audio = Audio(self.enemy_chase_audio, autoplay=False)
+        self.enemy.chase_scream_short = Audio(self.chase_scream_short, autoplay=False)
+        self.enemy.spawn_locations = self.enemy_spawn_locations
         self.flashlight_light.update_values()
-        # self.bgm.play()
+        self.bgm.play()
 
     def update(self):
         if (self.player.collected_souls == len(self.soul_positions)) and not self.finished_level:
             self.finished_level = True
-            self.load_next_level()
+            self.loading_screen()
             # Entity(parent=camera.ui, model='quad', texture="assets/videos/gratitude.mp4", scale=(2, 1), z=100)
             # invoke(application.quit, delay=15)
         self.flashlight_light.direction = camera.forward.normalized()
@@ -104,11 +106,27 @@ class MainGame(Entity):
             self.load_next_level()
             self.bgm.stop()
 
-    def load_next_level(self):
+    def loading_screen(self):
         self.level += 1
+        if self.enemy.pursuing_player:
+            self.enemy.chase_audio.stop()
+            self.enemy.chase_scream_short.stop()
+            self.enemy.found_player_audio.stop()
+            self.enemy.pursuit_timeout.kill()
         destroy(self.walls)
+        destroy(self.enemy)
+        next_level = Entity(parent=camera.ui, model='quad', texture="assets/videos/next_level.mp4", scale=(2, 1), z=100)
+        next_level_audio = Audio("assets/video/next_level.mp4")
+        invoke(destroy, next_level, delay=6.50)
+        invoke(destroy, next_level_audio, delay=6.50)
+        invoke(self.load_next_level, delay=6.50)
 
+    def load_next_level(self):
         data = json.load(open("assets/levels_info.json"))
+        if self.level > len(data):
+            end_video = Entity(parent=camera.ui, model='quad', texture="assets/videos/finish.mp4", scale=(2, 1), z=100)
+            end_video_audio = Audio("assets/videos/finish.mp4")
+            invoke(application.quit, delay=6.50)
 
         self.player.world_position = data[f"room{self.level}"]["playerPos"]
 
@@ -116,7 +134,8 @@ class MainGame(Entity):
         wall_material.texture = load_texture("assets/textures/chipping-painted-wall_albedo")
         wall_material.specular_map = load_texture("assets/textures/chipping-painted-wall_metallic")
         wall_material.texture_scale = Vec2(100, 100)
-        self.walls = cEntity(model=f"assets/objects/room{self.level}.obj", scale=6, position=(0, -0.5, 0), collider="mesh",
+        self.walls = cEntity(model=f"assets/objects/room{self.level}.obj", scale=6, position=(0, -0.5, 0),
+                             collider="mesh",
                              shader=self.shader)
         self.walls.set_material(wall_material)
         for vec in data[f"room{self.level}"]["soul_positions"]:
@@ -126,3 +145,36 @@ class MainGame(Entity):
                           font=self.counter_text.font
                           )
             orb.world_position = Vec3(vec[0], vec[1], vec[2])
+
+        self.enemy_texture = data[f"room{self.level}"]["enemy"]["texture"]
+        enemy_material = Material()
+        enemy_material.texture = load_texture(self.enemy_texture)
+        enemy_material.specular_map = load_texture(self.enemy_texture)
+        self.enemy = BaseEnemy(model="quad",
+                               shader=self.shader,
+                               position=Vec3(
+                                   data[f"room{self.level}"]["enemy"]["init_pos"][0],
+                                   data[f"room{self.level}"]["enemy"]["init_pos"][1],
+                                   data[f"room{self.level}"]["enemy"]["init_pos"][2]),
+                               collider="box",
+                               double_sided=True,
+                               scale=(6, 6, enemy_material.texture.width),
+                               target=self.player,
+                               walls=self.walls,
+                               flashlight=self.flashlight_light,
+                               jumpscare_texture=data[f"room{self.level}"]["enemy"]["jumpscare_texture"],
+                               finished_level = self.finished_level
+                               )
+        self.enemy.collider = BoxCollider(self.enemy, Vec3(0, 0, 0), Vec3(0.5, 1, 0))
+        self.enemy.set_material(enemy_material)
+        self.enemy.found_player_audio = Audio(self.enemy_found_player_audio, autoplay=False)
+        self.enemy.chase_audio = Audio(self.enemy_chase_audio, autoplay=False)
+        self.enemy.chase_scream_short = Audio(self.chase_scream_short, autoplay=False)
+        self.enemy.spawn_locations = [
+            Vec3(data[f"room{self.level}"]["enemy"]["spawn_locations"][0][0], data[f"room{self.level}"]["enemy"]["spawn_locations"][0][1], data[f"room{self.level}"]["enemy"]["spawn_locations"][0][2]),
+            Vec3(data[f"room{self.level}"]["enemy"]["spawn_locations"][1][0], data[f"room{self.level}"]["enemy"]["spawn_locations"][1][1], data[f"room{self.level}"]["enemy"]["spawn_locations"][1][2]),
+            Vec3(data[f"room{self.level}"]["enemy"]["spawn_locations"][2][0], data[f"room{self.level}"]["enemy"]["spawn_locations"][2][1], data[f"room{self.level}"]["enemy"]["spawn_locations"][2][2]),
+            Vec3(data[f"room{self.level}"]["enemy"]["spawn_locations"][3][0], data[f"room{self.level}"]["enemy"]["spawn_locations"][3][1], data[f"room{self.level}"]["enemy"]["spawn_locations"][3][2])
+        ]
+
+        self.finished_level = False

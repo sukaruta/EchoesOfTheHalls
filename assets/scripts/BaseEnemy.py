@@ -9,6 +9,7 @@ class BaseEnemy(cEntity, Entity):
         self.speed = 5
         self.gravity = 1
         self.pursuing_player = False
+        self.jumpscare_texture = ""
         self.pursuit_timeout = None
         self.player_path = []
         self.spawn_locations = []
@@ -94,7 +95,7 @@ class BaseEnemy(cEntity, Entity):
         self.found_player_audio.stop()
         self.chase_audio.stop()
         scene.clear()
-        Entity(model="quad", texture="textures/kimjump.png", parent=camera.ui, scale=(2, 1))
+        Entity(model="quad", texture=self.jumpscare_texture, parent=camera.ui, scale=(2, 1))
         jumpscare_sound = self.chase_scream_short
         jumpscare_sound.loop = True
         jumpscare_sound.loops = 100

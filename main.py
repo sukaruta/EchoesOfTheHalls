@@ -36,7 +36,8 @@ def start_game():
              enemy_texture=data["room1"]["enemy"]["texture"],
              enemy_found_player_audio=data["room1"]["enemy"]["found_player_audio"],
              enemy_chase_audio=data["room1"]["enemy"]["chase_audio"],
-             chase_scream_short=data["room1"]["enemy"]["chase_scream_short"]
+             chase_scream_short=data["room1"]["enemy"]["chase_scream_short"],
+             jumpscare_texture=data["room1"]["enemy"]["jumpscare_texture"]
              )
 
 
@@ -52,7 +53,7 @@ menu_video_sound = Audio("assets/sfx/neon_sounds.mp3")
 menu_video_sound.loop = True
 menu_video_sound.play()
 menu_bg = Entity(parent=camera.ui, model='quad', texture="assets/videos/neon_flickering.mp4", scale=(2, 1), z=100)
-start = Button(radius=0, text='Start (BETA)', scale=(.2, .1), y=-0.1, on_click=init_game)
+start = Button(radius=0, text='Start', scale=(.2, .1), y=-0.1, on_click=init_game)
 menu_icon = Entity(parent=camera.ui, model='quad', texture="assets/textures/echoes.png", scale=0.5, y=0.3)
 start.alpha = 0.4
 

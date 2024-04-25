@@ -11,6 +11,7 @@
         ],
         "enemy": {
             "texture": "assets/textures/kimmonster.png",
+            "jumpscare_texture": "assets/textures/kimjump.png",
             "found_player_audio": "assets/sfx/monsters/kim/found_player.wav",
             "chase_audio": "assets/sfx/monsters/kim/chase_scream.wav",
             "chase_scream_short": "assets/sfx/monsters/kim/chase_scream_short.wav",
@@ -36,10 +37,11 @@
         ],
         "enemy": {
             "texture": "assets/textures/janisian.png",
+            "jumpscare_texture": "assets/textures/janisianjump.png",
             "found_player_audio": "assets/sfx/monsters/kim/found_player.wav",
             "chase_audio": "assets/sfx/monsters/kim/chase_scream.wav",
             "chase_scream_short": "assets/sfx/monsters/kim/chase_scream_short.wav",
-            "init_pos": [22.96, 0.13, 23.02],
+            "init_pos": [22.96, 3, 23.02],
             "spawn_locations": [
                 [-26, 1, 25],
                 [-17.9, 0, 13.1],
