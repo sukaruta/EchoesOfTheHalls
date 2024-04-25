@@ -48,7 +48,7 @@ def init_game():
     invoke(start_game, delay=7)
 
 
-app = Ursina(title="EotH", icon="assets/textures/echoes.ico", borderless=False)
+app = Ursina(title="EotH", icon="assets/textures/echoes.ico", borderless=True, development_mode=False, fullscreen=True)
 menu_video_sound = Audio("assets/sfx/neon_sounds.mp3")
 menu_video_sound.loop = True
 menu_video_sound.play()
