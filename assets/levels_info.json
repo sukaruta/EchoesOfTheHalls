@@ -30,23 +30,49 @@
         "room_audio": "assets/sfx/burningmemory.ogg",
         "playerPos": [-6, 0.2, 11.38],
         "soul_positions": [
-            [-26, 1, 25],
-            [-17.9, 1, 13.1],
+            [-24, 1, 25],
+            [23.811, 1, -25.296],
             [-2, 1, -1],
             [-0.92, 1, 19.39]
         ],
         "enemy": {
             "texture": "assets/textures/janisian.png",
             "jumpscare_texture": "assets/textures/janisianjump.png",
-            "found_player_audio": "assets/sfx/monsters/kim/found_player.wav",
-            "chase_audio": "assets/sfx/monsters/kim/chase_scream.wav",
-            "chase_scream_short": "assets/sfx/monsters/kim/chase_scream_short.wav",
+            "found_player_audio": "assets/sfx/monsters/janisian/found_player.wav",
+            "chase_audio": "assets/sfx/monsters/janisian/chase_scream.wav",
+            "chase_scream_short": "assets/sfx/monsters/janisian/chase_scream_short.wav",
             "init_pos": [22.96, 3, 23.02],
             "spawn_locations": [
-                [-26, 1, 25],
-                [-17.9, 0, 13.1],
-                [-2, 0, -1],
-                [-0.92, 0, 19.39]
+                [25.241, 3, -4.148],
+                [2.636, 3, 5.403],
+                [-23.537, 3, 23.857],
+                [22.96, 3, 23.02]
+            ]
+        }
+    },
+
+        "room3": {
+        "obj_dir": "assets/objects/room3.obj",
+        "room_audio": "assets/sfx/burningmemory.ogg",
+        "playerPos": [-6, 0.2, 11.38],
+        "soul_positions": [
+            [-24, 1, 25],
+            [23.811, 1, -25.296],
+            [-2, 1, -1],
+            [-0.92, 1, 19.39]
+        ],
+        "enemy": {
+            "texture": "assets/textures/catch.png",
+            "jumpscare_texture": "assets/videos/catchjump.mov",
+            "found_player_audio": "assets/sfx/monsters/catch/found_player.wav",
+            "chase_audio": "assets/sfx/monsters/catch/chase_scream.wav",
+            "chase_scream_short": "assets/sfx/monsters/catch/chase_scream_short.wav",
+            "init_pos": [22.96, 3, 23.02],
+            "spawn_locations": [
+                [25.241, 3, -4.148],
+                [2.636, 3, 5.403],
+                [-23.537, 3, 23.857],
+                [22.96, 3, 23.02]
             ]
         }
     }

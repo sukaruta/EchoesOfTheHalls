@@ -3,6 +3,7 @@ from prefabs.material import Material
 from prefabs.entity import cEntity
 from prefabs.light import SpotLight
 from assets.scripts.BaseEnemy import BaseEnemy
+from assets.scripts.CatchEnemy import CatchEnemy
 from assets.scripts.SoulOrb import SoulOrb
 from prefabs.first_person_controller import FirstPersonController
 import json
@@ -88,6 +89,8 @@ class MainGame(Entity):
         self.enemy.chase_audio = Audio(self.enemy_chase_audio, autoplay=False)
         self.enemy.chase_scream_short = Audio(self.chase_scream_short, autoplay=False)
         self.enemy.spawn_locations = self.enemy_spawn_locations
+
+        self.enemy.disable()
         self.flashlight_light.update_values()
         self.bgm.play()
 
@@ -150,31 +153,84 @@ class MainGame(Entity):
         enemy_material = Material()
         enemy_material.texture = load_texture(self.enemy_texture)
         enemy_material.specular_map = load_texture(self.enemy_texture)
-        self.enemy = BaseEnemy(model="quad",
-                               shader=self.shader,
-                               position=Vec3(
-                                   data[f"room{self.level}"]["enemy"]["init_pos"][0],
-                                   data[f"room{self.level}"]["enemy"]["init_pos"][1],
-                                   data[f"room{self.level}"]["enemy"]["init_pos"][2]),
-                               collider="box",
-                               double_sided=True,
-                               scale=(6, 6, enemy_material.texture.width),
-                               target=self.player,
-                               walls=self.walls,
-                               flashlight=self.flashlight_light,
-                               jumpscare_texture=data[f"room{self.level}"]["enemy"]["jumpscare_texture"],
-                               finished_level = self.finished_level
-                               )
-        self.enemy.collider = BoxCollider(self.enemy, Vec3(0, 0, 0), Vec3(0.5, 1, 0))
-        self.enemy.set_material(enemy_material)
-        self.enemy.found_player_audio = Audio(self.enemy_found_player_audio, autoplay=False)
-        self.enemy.chase_audio = Audio(self.enemy_chase_audio, autoplay=False)
-        self.enemy.chase_scream_short = Audio(self.chase_scream_short, autoplay=False)
-        self.enemy.spawn_locations = [
-            Vec3(data[f"room{self.level}"]["enemy"]["spawn_locations"][0][0], data[f"room{self.level}"]["enemy"]["spawn_locations"][0][1], data[f"room{self.level}"]["enemy"]["spawn_locations"][0][2]),
-            Vec3(data[f"room{self.level}"]["enemy"]["spawn_locations"][1][0], data[f"room{self.level}"]["enemy"]["spawn_locations"][1][1], data[f"room{self.level}"]["enemy"]["spawn_locations"][1][2]),
-            Vec3(data[f"room{self.level}"]["enemy"]["spawn_locations"][2][0], data[f"room{self.level}"]["enemy"]["spawn_locations"][2][1], data[f"room{self.level}"]["enemy"]["spawn_locations"][2][2]),
-            Vec3(data[f"room{self.level}"]["enemy"]["spawn_locations"][3][0], data[f"room{self.level}"]["enemy"]["spawn_locations"][3][1], data[f"room{self.level}"]["enemy"]["spawn_locations"][3][2])
-        ]
+
+        if self.level == 3:
+            self.enemy = CatchEnemy(model="quad",
+                                   shader=self.shader,
+                                   position=Vec3(
+                                       data[f"room{self.level}"]["enemy"]["init_pos"][0],
+                                       data[f"room{self.level}"]["enemy"]["init_pos"][1],
+                                       data[f"room{self.level}"]["enemy"]["init_pos"][2]),
+                                   collider="box",
+                                   double_sided=True,
+                                   scale=(6, 6, enemy_material.texture.width),
+                                   target=self.player,
+                                   walls=self.walls,
+                                   flashlight=self.flashlight_light,
+                                   jumpscare_texture=data[f"room{self.level}"]["enemy"]["jumpscare_texture"],
+                                   finished_level=self.finished_level
+                                   )
+            self.enemy.collider = BoxCollider(self.enemy, Vec3(0, 0, 0), Vec3(0.5, 1, 0))
+            self.enemy.set_material(enemy_material)
+            self.enemy_found_player_audio = data[f"room{self.level}"]["enemy"]["found_player_audio"]
+            self.enemy_chase_audio = data[f"room{self.level}"]["enemy"]["found_player_audio"]
+            self.chase_scream_short = data[f"room{self.level}"]["enemy"]["chase_scream_short"]
+            self.enemy.found_player_audio = Audio(self.enemy_found_player_audio, autoplay=False)
+            self.enemy.chase_audio = Audio(self.enemy_chase_audio, autoplay=False)
+            self.enemy.chase_scream_short = Audio(self.chase_scream_short, autoplay=False)
+            self.enemy.spawn_locations = [
+                Vec3(data[f"room{self.level}"]["enemy"]["spawn_locations"][0][0],
+                     data[f"room{self.level}"]["enemy"]["spawn_locations"][0][1],
+                     data[f"room{self.level}"]["enemy"]["spawn_locations"][0][2]),
+                Vec3(data[f"room{self.level}"]["enemy"]["spawn_locations"][1][0],
+                     data[f"room{self.level}"]["enemy"]["spawn_locations"][1][1],
+                     data[f"room{self.level}"]["enemy"]["spawn_locations"][1][2]),
+                Vec3(data[f"room{self.level}"]["enemy"]["spawn_locations"][2][0],
+                     data[f"room{self.level}"]["enemy"]["spawn_locations"][2][1],
+                     data[f"room{self.level}"]["enemy"]["spawn_locations"][2][2]),
+                Vec3(data[f"room{self.level}"]["enemy"]["spawn_locations"][3][0],
+                     data[f"room{self.level}"]["enemy"]["spawn_locations"][3][1],
+                     data[f"room{self.level}"]["enemy"]["spawn_locations"][3][2])
+            ]
+        else:
+            self.enemy = BaseEnemy(model="quad",
+                                   shader=self.shader,
+                                   position=Vec3(
+                                       data[f"room{self.level}"]["enemy"]["init_pos"][0],
+                                       data[f"room{self.level}"]["enemy"]["init_pos"][1],
+                                       data[f"room{self.level}"]["enemy"]["init_pos"][2]),
+                                   collider="box",
+                                   double_sided=True,
+                                   scale=(6, 6, enemy_material.texture.width),
+                                   target=self.player,
+                                   walls=self.walls,
+                                   flashlight=self.flashlight_light,
+                                   jumpscare_texture=data[f"room{self.level}"]["enemy"]["jumpscare_texture"],
+                                   finished_level=self.finished_level
+                                   )
+            self.enemy.collider = BoxCollider(self.enemy, Vec3(0, 0, 0), Vec3(0.5, 1, 0))
+            self.enemy.set_material(enemy_material)
+            self.enemy_found_player_audio = data[f"room{self.level}"]["enemy"]["found_player_audio"]
+            self.enemy_chase_audio = data[f"room{self.level}"]["enemy"]["found_player_audio"]
+            self.chase_scream_short = data[f"room{self.level}"]["enemy"]["chase_scream_short"]
+            self.enemy.found_player_audio = Audio(self.enemy_found_player_audio, autoplay=False)
+            self.enemy.chase_audio = Audio(self.enemy_chase_audio, autoplay=False)
+            self.enemy.chase_scream_short = Audio(self.chase_scream_short, autoplay=False)
+            self.enemy.spawn_locations = [
+                Vec3(data[f"room{self.level}"]["enemy"]["spawn_locations"][0][0],
+                     data[f"room{self.level}"]["enemy"]["spawn_locations"][0][1],
+                     data[f"room{self.level}"]["enemy"]["spawn_locations"][0][2]),
+                Vec3(data[f"room{self.level}"]["enemy"]["spawn_locations"][1][0],
+                     data[f"room{self.level}"]["enemy"]["spawn_locations"][1][1],
+                     data[f"room{self.level}"]["enemy"]["spawn_locations"][1][2]),
+                Vec3(data[f"room{self.level}"]["enemy"]["spawn_locations"][2][0],
+                     data[f"room{self.level}"]["enemy"]["spawn_locations"][2][1],
+                     data[f"room{self.level}"]["enemy"]["spawn_locations"][2][2]),
+                Vec3(data[f"room{self.level}"]["enemy"]["spawn_locations"][3][0],
+                     data[f"room{self.level}"]["enemy"]["spawn_locations"][3][1],
+                     data[f"room{self.level}"]["enemy"]["spawn_locations"][3][2])
+            ]
+
+        # self.enemy.disable()
 
         self.finished_level = False
