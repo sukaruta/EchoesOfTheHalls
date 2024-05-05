@@ -6,7 +6,7 @@ from assets.scripts.MainGame import MainGame
 def start_game():
     scene.clear()
     data = json.load(open("assets/levels_info.json"))
-    MainGame(level=2,
+    MainGame(level=1,
              obj_dir=data["room1"]["obj_dir"],
              room_audio=data["room1"]["room_audio"],
              player_pos=Vec3(data["room1"]["playerPos"][0], data["room1"]["playerPos"][1],
@@ -37,7 +37,8 @@ def start_game():
              enemy_found_player_audio=data["room1"]["enemy"]["found_player_audio"],
              enemy_chase_audio=data["room1"]["enemy"]["chase_audio"],
              chase_scream_short=data["room1"]["enemy"]["chase_scream_short"],
-             jumpscare_texture=data["room1"]["enemy"]["jumpscare_texture"]
+             jumpscare_texture=data["room1"]["enemy"]["jumpscare_texture"],
+             data=data
              )
 
 

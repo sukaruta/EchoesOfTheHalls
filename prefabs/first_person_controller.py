@@ -47,7 +47,7 @@ class FirstPersonController(Entity):
                 self.y = ray.world_point.y
 
     def update(self):
-        print(self.world_position)
+        # print(self.world_position)
         if (not self.sprinting or (self.is_moving() is False)) and self.stamina < 100:
             self.stamina += .2
         elif self.sprinting and (held_keys['w'] or held_keys['a'] or held_keys['s'] or held_keys['d']):

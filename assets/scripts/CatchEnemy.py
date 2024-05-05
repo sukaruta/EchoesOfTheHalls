@@ -5,6 +5,8 @@ from prefabs.entity import cEntity
 class CatchEnemy(cEntity, Entity):
     def __init__(self, **kwargs):
         super().__init__()
+        self.jumpscare_timer = None
+        self.player_vision = None
         self.vision = None
         self.speed = 5
         self.gravity = 1
@@ -13,6 +15,8 @@ class CatchEnemy(cEntity, Entity):
         self.pursuit_timeout = None
         self.player_path = []
         self.spawn_locations = []
+        self.screech = None
+        self.in_caught_sequence = False
 
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -20,23 +24,36 @@ class CatchEnemy(cEntity, Entity):
     def update(self):
         self.look_at_2d(self.target.position, 'y')
         vision_range = 50
-        if self.pursuing_player:
-            vision_range = 10
+        self_vision_range = 50
+
+        self.player_vision = raycast(
+            (self.target.world_position.x, 0, self.target.world_position.z) + (
+                self.target.up.x, self.target.height, self.target.up.z),
+            self.target.forward, distance=vision_range, ignore=[self.target], debug=True)
+        if ((self.player_vision.hit and (
+                self.player_vision.entities[0] == self)) and not self.target.is_dead) and not self.in_caught_sequence:
+            self.in_caught_sequence = True
+            if self.jumpscare_timer is not None:
+                self.jumpscare_timer.kill()
+                self.jumpscare_timer = None
+            self.screech.play()
+            invoke(self.run_away, delay=2)
+
         self.vision = raycast(
-            (self.world_position.x, 0, self.world_position.z) + (self.up.x, self.target.height - 1.3, self.up.z),
-            self.forward, distance=vision_range, ignore=[self])
-        if ((self.vision.hit and (self.vision.entities[0] == self.target)) and not self.pursuing_player) and not self.target.is_dead:
-            # Begin chase
+                (self.world_position.x, 0, self.world_position.z) + (self.up.x, self.target.height, self.up.z),
+                self.forward, distance=self_vision_range, ignore=[self], debug=True)
+
+        if (((self.vision.hit and (self.vision.entities[0] == self.target)) and not self.pursuing_player)
+                and not self.target.is_dead) and not self.in_caught_sequence:
+                # Begin chase
+            print("This ran")
             self.pursuing_player = True
             self.player_path.append(self.target.world_position)
-            if not self.found_player_audio.playing and self.pursuing_player:
-                self.found_player_audio.play()
-                self.chase_audio.loops = 50
-                self.chase_audio.loop = True
-                invoke(self.chase_audio.play, delay=self.found_player_audio.length)
             self.pursuit()
+            return
 
         if self.pursuing_player:
+            print("This also ran")
             self.player_path.append(self.target.world_position)
             self.pursuit()
 
@@ -48,10 +65,9 @@ class CatchEnemy(cEntity, Entity):
         return False
 
     def pursuit(self):
-        self.set_volume_proximity()
-
-        if self.pursuit_timeout is None or not self.pursuit_timeout.started:
-            self.pursuit_timeout = invoke(self.stop_pursuit, delay=11)
+        print(self.in_caught_sequence)
+        if self.in_caught_sequence:
+            return
 
         for playerPos in self.player_path:
             self.world_position = lerp(
@@ -63,53 +79,47 @@ class CatchEnemy(cEntity, Entity):
         collision_info = self.intersects(self.target)
         if collision_info.hit and not self.target.is_dead:
             self.jumpscare()
+            return
+        elif distance(self.position, self.target.position) < 0.5 and self.jumpscare_timer is None:
+            self.jumpscare_warn()
 
-        if not self.chase_audio.playing and self.pursuing_player:
-            self.chase_audio.loops = 50
-            self.chase_audio.loop = True
-            self.chase_audio.play()
-
-    def stop_pursuit(self):
+    def run_away(self):
         def enable_flashlight():
             self.flashlight.world_position = self.target.world_position
             self.flashlight.add_script(SmoothFollow(self.target, offset=(0, self.target.height, 0)))
 
         def disable_flashlight():
-            self.flashlight.scripts.pop()
+            self.flashlight.scripts = []
             self.flashlight.world_position = Vec3(0, -10, 0)
 
         self.pursuit_timeout = None
         if not self.target.is_dead:
             self.pursuing_player = False
-            self.chase_audio.stop(destroy=False)
-            self.chase_audio.loop = False
             disable_flashlight()
             invoke(enable_flashlight, delay=1)
             new_spawn = random.choice(self.spawn_locations)
             self.world_position = (new_spawn.x, self.world_position.y, new_spawn.z)
 
+        self.in_caught_sequence = False
+
+    def jumpscare_warn(self):
+        self.jumpscare_warn_sound.play()
+        self.jumpscare_timer = invoke(self.jumpscare, delay=self.jumpscare_warn_sound.length)
+
     def jumpscare(self):
         self.target.is_dead = True
         self.pursuing_player = False
-        self.chase_audio.loop = False
-        self.found_player_audio.stop()
-        self.chase_audio.stop()
         scene.clear()
         Entity(model="quad", texture=self.jumpscare_texture, parent=camera.ui, scale=(2, 1))
-        # jumpscare_sound = self.chase_scream_short
-        # jumpscare_sound.loop = True
-        # jumpscare_sound.loops = 100
-        # jumpscare_sound.play()
-        self.death_screen()
-
-    def set_volume_proximity(self):
-        volume = max(1 - distance(self.target.position, self.position) / 30, 0)
-        self.chase_audio.volume = volume
+        self.jumpscare_sound.play()
+        invoke(self.jumpscare_sound.stop, delay=self.jumpscare_sound.length)
+        invoke(self.death_screen, delay=self.jumpscare_sound.length)
 
     @staticmethod
     def death_screen():
         scene.clear()
-        Entity(model="quad", parent=camera.ui, texture="assets/videos/catchjump.mov", scale=(2, 1))
-        catch_jump_sound = Audio("sfx/monsters/catch/catchjump.wav", auto_destroy=True)
-        print("IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT.")
+        Entity(model="quad", parent=camera.ui, texture="assets/videos/catchcustomdeath.mov", scale=(2, 1))
+        catch_jump_sound = Audio("sfx/monsters/catch/catchcustomdeath.wav", auto_destroy=True)
+        print(
+            "IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT. IT'S YOUR FAULT.")
         invoke(application.quit, delay=catch_jump_sound.length)
