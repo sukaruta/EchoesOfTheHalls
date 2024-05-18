@@ -6,7 +6,6 @@ from assets.scripts.BaseEnemy import BaseEnemy
 from assets.scripts.CatchEnemy import CatchEnemy
 from assets.scripts.SoulOrb import SoulOrb
 from prefabs.first_person_controller import FirstPersonController
-import json
 
 
 class MainGame(Entity):
@@ -116,7 +115,7 @@ class MainGame(Entity):
 
     def loading_screen(self):
         self.level += 1
-        if self.enemy.pursuing_player:
+        if self.enemy.pursuing_player and not self.level - 1 == 3:
             self.enemy.chase_audio.stop()
             self.enemy.chase_scream_short.stop()
             self.enemy.found_player_audio.stop()

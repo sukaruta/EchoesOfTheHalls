@@ -12,11 +12,11 @@ class CatchEnemy(cEntity, Entity):
         self.gravity = 1
         self.pursuing_player = False
         self.jumpscare_texture = ""
-        self.pursuit_timeout = None
         self.player_path = []
         self.spawn_locations = []
         self.screech = None
         self.in_caught_sequence = False
+        self.in_jumpscare_warn_sequence = False
 
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -29,9 +29,8 @@ class CatchEnemy(cEntity, Entity):
         self.player_vision = raycast(
             (self.target.world_position.x, 0, self.target.world_position.z) + (
                 self.target.up.x, self.target.height, self.target.up.z),
-            self.target.forward, distance=vision_range, ignore=[self.target], debug=True)
-        if ((self.player_vision.hit and (
-                self.player_vision.entities[0] == self)) and not self.target.is_dead) and not self.in_caught_sequence:
+            self.target.forward, distance=vision_range, ignore=[self.target])
+        if ((self.player_vision.hit and (self.player_vision.entities[0] == self)) and not self.target.is_dead) and not self.in_caught_sequence:
             self.in_caught_sequence = True
             if self.jumpscare_timer is not None:
                 self.jumpscare_timer.kill()
@@ -41,19 +40,15 @@ class CatchEnemy(cEntity, Entity):
 
         self.vision = raycast(
                 (self.world_position.x, 0, self.world_position.z) + (self.up.x, self.target.height, self.up.z),
-                self.forward, distance=self_vision_range, ignore=[self], debug=True)
+                self.forward, distance=self_vision_range, ignore=[self])
 
-        if (((self.vision.hit and (self.vision.entities[0] == self.target)) and not self.pursuing_player)
-                and not self.target.is_dead) and not self.in_caught_sequence:
-                # Begin chase
-            print("This ran")
+        if (((self.vision.hit and (self.vision.entities[0] == self.target)) and not self.pursuing_player) and not self.target.is_dead) and not self.in_caught_sequence:
             self.pursuing_player = True
             self.player_path.append(self.target.world_position)
             self.pursuit()
             return
 
         if self.pursuing_player:
-            print("This also ran")
             self.player_path.append(self.target.world_position)
             self.pursuit()
 
@@ -65,7 +60,6 @@ class CatchEnemy(cEntity, Entity):
         return False
 
     def pursuit(self):
-        print(self.in_caught_sequence)
         if self.in_caught_sequence:
             return
 
@@ -76,11 +70,7 @@ class CatchEnemy(cEntity, Entity):
                 time.dt * 1)
             self.player_path.pop()
 
-        collision_info = self.intersects(self.target)
-        if collision_info.hit and not self.target.is_dead:
-            self.jumpscare()
-            return
-        elif distance(self.position, self.target.position) < 0.5 and self.jumpscare_timer is None:
+        if distance(self.position, self.target.position) < 0.5 and self.jumpscare_timer is None:
             self.jumpscare_warn()
 
     def run_away(self):
@@ -92,8 +82,8 @@ class CatchEnemy(cEntity, Entity):
             self.flashlight.scripts = []
             self.flashlight.world_position = Vec3(0, -10, 0)
 
-        self.pursuit_timeout = None
         if not self.target.is_dead:
+            self.player_path = []
             self.pursuing_player = False
             disable_flashlight()
             invoke(enable_flashlight, delay=1)
